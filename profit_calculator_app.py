@@ -8,7 +8,7 @@ st.caption("Простой онлайн-калькулятор по аналог
 
 # === Ввод данных ===
 price = st.number_input("Введите цену продажи (₽):", min_value=1.0, step=1.0)
-avg_time = st.number_input("Введите среднее время доставки (ч):", min_value=29, max_value=47, step=1)
+avg_time = st.number_input("Введите среднее время доставки (ч):", min_value=1, max_value=100, step=1)
 
 # --- Таблица коэффициентов ---
 delivery_table = {
@@ -182,4 +182,5 @@ if st.button("Рассчитать прибыль"):
             hide_index=True,
             use_container_width=True
         )
+
 
