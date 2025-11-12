@@ -15,8 +15,8 @@ price = st.number_input(
 
 avg_time = st.number_input(
     "Введите среднее время доставки (ч):", 
-    min_value=1,      # теперь от 1
-    max_value=100,    # теперь до 100
+    min_value=1,      
+    max_value=100,    
     step=1
 )
 
@@ -39,9 +39,8 @@ delivery_table = {
     57: (1.792, 0.0396), 58: (1.794, 0.0397), 59: (1.796, 0.0398), 60: (1.798, 0.0399),
 }
 
-# добавляем 61–100 отдельно и объединяем словари
+# добавляем 61–100
 delivery_table.update({i: (1.8, 0.0400) for i in range(61, 101)})
-
 
 def calc_profit(price, avg_time):
     # --- % Озон ---
@@ -75,27 +74,37 @@ def calc_profit(price, avg_time):
     profit = price - total_costs
 
     data = [
-        ["% Озон", f"{ozon_percent*100:.0f}%", ozon_total],
-        ["Логистика", "", logistic_total],
-        ["Последняя миля", "", last_mile],
-        ["Эквайринг", "", acquiring],
-        ["Реклама", f"{reklama_percent*100:.0f}%", reklama],
-        ["Кросс-док", "", cross_dock],
-        ["SKU", "", sku],
-        ["Дань", f"{dan_percent*100:.0f}%", dan],
-        ["💰 Общие расходы", "", total_costs],
-        ["✅ Прибыль", "", profit],
+        ["% Озон", f"{ozon_percent*100:.0f}%", f"{ozon_total:.2f}"],
+        ["Логистика", "", f"{logistic_total:.2f}"],
+        ["Последняя миля", "", f"{last_mile:.2f}"],
+        ["Эквайринг", "", f"{acquiring:.2f}"],
+        ["Реклама", f"{reklama_percent*100:.0f}%", f"{reklama:.2f}"],
+        ["Кросс-док", "", f"{cross_dock:.2f}"],
+        ["SKU", "", f"{sku:.2f}"],
+        ["Дань", f"{dan_percent*100:.0f}%", f"{dan:.2f}"],
+        ["💰 Общие расходы", "", f"{total_costs:.2f}"],
+        ["✅ Прибыль", "", f"{profit:.2f}"],
     ]
-    
-    df = pd.DataFrame(data, columns=["Статья", "Процент", "Сумма (₽)"])
-    df["Сумма (₽)"] = df["Сумма (₽)"].map(lambda x: f"{x:.2f}")  # до 2 знаков после запятой
-    return df
 
-# === Кнопка расчёта ===
+    df = pd.DataFrame(data, columns=["Статья", "Процент", "Сумма (₽)"])
+
+    # --- Определяем цвет строки "Прибыль" ---
+    last_row_color = "red" if profit < 0 else "yellow" if profit <= 20 else "green"
+
+    # --- Генерируем HTML ---
+    html = '<table style="border-collapse: collapse; width: 100%;">'
+    html += '<tr><th style="min-width:180px;text-align:left;">Статья</th><th style="min-width:60px;">Процент</th><th style="min-width:80px;">Сумма (₽)</th></tr>'
+    for i, row in df.iterrows():
+        color = last_row_color if i == 9 else "white"  # только 10-я строка
+        html += f'<tr style="background-color:{color};"><td>{row["Статья"]}</td><td>{row["Процент"]}</td><td>{row["Сумма (₽)"]}</td></tr>'
+    html += '</table>'
+
+    return html
+
+# === Кнопка расчета ===
 if st.button("Рассчитать прибыль"):
     if price <= 0:
         st.error("Введите корректную цену продажи")
     else:
-        df = calc_profit(price, avg_time)
-        st.table(df)  # фиксированные столбцы, нельзя менять порядок на телефоне
-
+        html_table = calc_profit(price, avg_time)
+        st.markdown(html_table, unsafe_allow_html=True)
