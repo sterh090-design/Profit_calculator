@@ -73,6 +73,7 @@ def calc_profit(price, avg_time):
         reklama + cross_dock + sku + dan
     )
     profit = price - total_costs
+    profit2 = price - total_costs - sku
 
     data = [
         ["% Озон", f"{ozon_percent*100:.0f}%", ozon_total],
@@ -84,7 +85,8 @@ def calc_profit(price, avg_time):
         ["SKU", "", sku],
         ["Дань", f"{dan_percent*100:.0f}%", dan],
         ["💰 Общие расходы", "", total_costs],
-        ["✅ Прибыль", "", profit],
+        ["✅ Прибыль 1 sku", "", profit],
+        ["✅ Прибыль 2 sku", "", profit2],
     ]
     
     df = pd.DataFrame(data, columns=["Статья", "Процент", "Сумма (₽)"])
@@ -98,3 +100,4 @@ if st.button("Рассчитать прибыль"):
     else:
         df = calc_profit(price, avg_time)
         st.table(df)  # фиксированные столбцы, нельзя менять порядок на телефоне
+
