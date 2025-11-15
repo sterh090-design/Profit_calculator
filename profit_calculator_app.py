@@ -113,38 +113,40 @@ def calc_profit(price, avg_time, sku_type):
     df["Сумма (₽)"] = df["Сумма (₽)"].map(lambda x: f"{x:.2f}")
     return df
 
-# === Кнопка расчёта ===
 if st.button("Рассчитать прибыль"):
     if price <= 0:
         st.error("Введите корректную цену продажи")
     else:
+        # Получаем таблицу с расходами и прибылью
         df = calc_profit(price, avg_time, sku_type)
         st.table(df)
- 
-    profit = float(df.loc[df["Статья"] == "✅ Прибыль", "Сумма (₽)"].values[0].replace(",", ""))
-  
-if 20 < profit < 40:
-    st.balloons()  # 🎉 Анимация салюта
-elif profit < 0:
-    # Ироничное сообщение с 7 мигaющими смайлами
-    st.markdown(
-        """
-        <div style="text-align: center;">
-            <h3 style="color:red; animation: blink 1s infinite;">
-                ⚠️ Так не пойдет! Надо работать эффективнее! ⚠️
-            </h3>
-            <p style="font-size:2rem; animation: blink 1s infinite;">😱😱😱😱😱😱😱</p>
-        </div>
-        <style>
-            @keyframes blink { 50% { opacity: 0; } }
-        </style>
-        """,
-        unsafe_allow_html=True
-    ) 
-elif profit > 40:  
-    # падающие доллары
-        st.image("https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif", width=700)
-    
+        
+        # Извлекаем прибыль из таблицы
+        profit = float(df.loc[df["Статья"] == "✅ Прибыль", "Сумма (₽)"].values[0].replace(",", ""))
+        
+        # --- Эффекты в зависимости от прибыли ---
+        if 20 < profit < 40:
+            # 🎉 Салют
+            st.balloons()
+        elif profit < 0:
+            # ⚠️ Мигающее предупреждение с 7 смайлами
+            st.markdown(
+                """
+                <div style="text-align: center;">
+                    <h3 style="color:red; animation: blink 1s infinite;">
+                        ⚠️ Так не пойдет! Надо работать эффективнее! ⚠️
+                    </h3>
+                    <p style="font-size:2rem; animation: blink 1s infinite;">😱😱😱😱😱😱😱</p>
+                </div>
+                <style>
+                    @keyframes blink { 50% { opacity: 0; } }
+                </style>
+                """,
+                unsafe_allow_html=True
+            )
+        elif profit > 40:
+            # 💵 Падающие доллары
+            st.image("https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif", width=700)
     
     
  
