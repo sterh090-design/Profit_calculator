@@ -20,16 +20,16 @@ avg_time = st.number_input(
     step=1
 )
 
-# --- Выбор количества ---
-quantity = st.radio(
-    "Выберите количество SKU для расчета прибыли:",
-    ("1 шт", "2 шт")
-)
+# # --- Выбор количества ---
+# quantity = st.radio(
+#     "Выберите количество SKU для расчета прибыли:",
+#     ("1 шт", "2 шт")
+# )
 
-# --- Выбор количества ---
-quantity2 = st.radio(
-    "Выберите количество SKU для расчета прибыли:",
-    ("1 шт", "2 шт")
+# --- Выбор SKU ---
+sku_type = st.radio(
+    "SKU для расчета прибыли:",
+    ("Беж247","Слк247","Бпбеж027","Бполив027","Бпчео027",)
 )
 
 
@@ -47,7 +47,7 @@ delivery_table.update({
 })
 delivery_table.update({i: (1.8, 0.0400) for i in range(61, 101)})
 
-def calc_profit(price, avg_time):
+def calc_profit(price, avg_time, sku_type):
     # --- % Озон ---
     if price < 100:
         ozon_percent = 0.14
@@ -57,17 +57,34 @@ def calc_profit(price, avg_time):
         ozon_percent = 0.20
     ozon_total = price * ozon_percent
 
-    # --- Логистика ---
-    coef, percent = delivery_table.get(avg_time, (1, 0))
-    logistic_total = 56 * coef + price * percent
 
+#Считаем логистику
+  # --- Логистика (CASE WHEN) ---
+    if sku_type in ("Бпбеж027", "Бполив027", "Бпчео027"):
+        logistic_baza = 26 if price < 300 else 56
+    elif sku_type in ("Беж247", "Слк247"):
+        logistic_baza = 27 if price < 300 else 56
+    else:
+        logistic_baza = 56
+
+
+# Продукты "Беж247", "Слк247" идут по 2 штуки
+    if sku_type in ("Беж247", "Слк247"):
+        sku = 47 * 2
+    else:
+        sku = 47
+
+    # --- Логистика по времени ---
+    coef, percent = delivery_table.get(avg_time, (1, 0))
+    logistic_total = logistic_baza * coef + price * percent
+    
+    
     # --- Остальные расходы ---
     last_mile = 2.5
     acquiring = 8.99
     reklama_percent = 0.15
     reklama = price * reklama_percent
     cross_dock = 12
-    sku = 47
     dan_percent = 0.07
     dan = price * dan_percent
 
@@ -76,12 +93,12 @@ def calc_profit(price, avg_time):
         ozon_total + logistic_total + last_mile + acquiring +
         reklama + cross_dock + sku + dan
     )
-    profit = price - total_costs
-    profit2 = price - total_costs - sku
 
+    profit = price - total_costs
+  
     data = [
         ["% Озон", f"{ozon_percent*100:.0f}%", ozon_total],
-        ["Логистика", "", logistic_total],
+        ["Логистика",  f"{logistic_baza} × {coef} + {price} × {percent}", logistic_total],
         ["Последняя миля", "", last_mile],
         ["Эквайринг", "", acquiring],
         ["Реклама", f"{reklama_percent*100:.0f}%", reklama],
@@ -89,7 +106,7 @@ def calc_profit(price, avg_time):
         ["SKU", "", sku],
         ["Дань", f"{dan_percent*100:.0f}%", dan],
         ["💰 Общие расходы", "", total_costs],
-        ["✅ Прибыль", "", profit if quantity == "1 шт" else profit2],
+        ["✅ Прибыль", "", profit],
     ]
     
     df = pd.DataFrame(data, columns=["Статья", "Процент", "Сумма (₽)"])
@@ -101,6 +118,9 @@ if st.button("Рассчитать прибыль"):
     if price <= 0:
         st.error("Введите корректную цену продажи")
     else:
-        df = calc_profit(price, avg_time)
+        df = calc_profit(price, avg_time, sku_type)
         st.table(df)
-
+ 
+    profit = float(df.loc[df["Статья"] == "✅ Прибыль", "Сумма (₽)"].values[0].replace(",", ""))
+    if profit > 40:
+        st.balloons()  # 🎉 Анимация салюта
