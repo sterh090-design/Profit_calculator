@@ -4,7 +4,7 @@ import pandas as pd
 st.set_page_config(page_title="Калькулятор прибыли", page_icon="💰", layout="centered")
 
 st.title("💰 Калькулятор прибыли")
-st.caption("Простой онлайн-калькулятор по аналогии с Excel")
+st.caption("Простой онлайн-калькулятор для помощи в акциях")
 
 # === Ввод данных ===
 price = st.number_input(
@@ -122,5 +122,31 @@ if st.button("Рассчитать прибыль"):
         st.table(df)
  
     profit = float(df.loc[df["Статья"] == "✅ Прибыль", "Сумма (₽)"].values[0].replace(",", ""))
-    if profit > 40:
-        st.balloons()  # 🎉 Анимация салюта
+  
+if 20 < profit < 40:
+    st.balloons()  # 🎉 Анимация салюта
+elif profit < 0:
+    # Ироничное сообщение с 7 мигaющими смайлами
+    st.markdown(
+        """
+        <div style="text-align: center;">
+            <h3 style="color:red; animation: blink 1s infinite;">
+                ⚠️ Так не пойдет! Надо работать эффективнее! ⚠️
+            </h3>
+            <p style="font-size:2rem; animation: blink 1s infinite;">😱😱😱😱😱😱😱</p>
+        </div>
+        <style>
+            @keyframes blink { 50% { opacity: 0; } }
+        </style>
+        """,
+        unsafe_allow_html=True
+    ) 
+elif profit > 40:  
+    # падающие доллары
+        st.image("https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif", width=700)
+    
+    
+    
+ 
+
+
