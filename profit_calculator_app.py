@@ -26,6 +26,13 @@ quantity = st.radio(
     ("1 шт", "2 шт")
 )
 
+# --- Выбор количества ---
+quantity2 = st.radio(
+    "Выберите количество SKU для расчета прибыли:",
+    ("1 шт", "2 шт")
+)
+
+
 # --- Таблица коэффициентов ---
 delivery_table = {i: (1, 0.0000) for i in range(1, 30)}
 delivery_table.update({
@@ -96,3 +103,4 @@ if st.button("Рассчитать прибыль"):
     else:
         df = calc_profit(price, avg_time)
         st.table(df)
+
